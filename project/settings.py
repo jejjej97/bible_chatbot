@@ -1,8 +1,10 @@
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'auto-gpt-bot'
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = False
+CSRF_TRUSTED_ORIGINS = ['https://bible_chatbot.onrender.com']
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.ngrok-free.app', '.onrender.com']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -45,3 +47,4 @@ MIDDLEWARE = [
 ]
 WSGI_APPLICATION = 'project.wsgi.application'
 STATIC_URL = '/static/'
+ALLOWED_HOSTS += ['.onrender.com']
