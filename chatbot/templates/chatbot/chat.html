@@ -1,0 +1,158 @@
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>성경 챗봇</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #F1F1F1;
+      margin: 0;
+      padding: 0;
+    }
+    .chat-container {
+      max-width: 600px;
+      margin: auto;
+      padding: 1em;
+      background: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .chat-header {
+      text-align: center;
+      padding: 1em 0;
+    }
+    .message-list {
+      flex-grow: 1;
+      padding-bottom: 1em;
+    }
+    .message {
+      margin: 0.5em 0;
+      padding: 0.7em 1em;
+      border-radius: 1em;
+      max-width: 80%;
+      line-height: 1.4;
+    }
+    .message.user {
+      background-color: #E0E7FF;
+      margin-left: auto;
+      text-align: right;
+    }
+    .message.bot {
+      background-color: #F3F4F6;
+      margin-right: auto;
+    }
+    .message .label {
+      font-weight: bold;
+      color: #555;
+      display: block;
+      margin-bottom: 0.2em;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid #ddd;
+      padding-top: 1em;
+    }
+    input[type="text"] {
+      padding: 0.8em;
+      font-size: 1em;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 0.5em;
+      padding: 0.8em;
+      font-size: 1em;
+      background: #673AB7;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #ccc;
+      border-top: 3px solid #673AB7;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      vertical-align: middle;
+      margin-left: 0.5em;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>🤖 성경 챗봇</h2>
+    </div>
+
+    <div class="message-list" id="message-list">
+      {% for history in chat_history %}
+        <div class="message user">
+          <span class="label">🙋 나:</span>
+          {{ history.user_input }}
+        </div>
+        <div class="message bot">
+          <span class="label">🤖 감지된 주제:</span>
+          {{ history.topics }}
+        </div>
+        <div class="message bot">
+          <span class="label">📖 추천 말씀:</span>
+        </div>
+        {% for r in history.result %}
+          <div class="message bot">
+            <b>{{ r.verse }}</b><br>
+            {{ r.text }}
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <div id="loading" class="message bot" style="display: none;">
+      <span class="label">🤖</span> 성경 말씀을 검색 중입니다...
+      <span class="spinner"></span>
+    </div>
+
+    <form method="post" onsubmit="return showLoading()">
+      {% csrf_token %}
+      <input type="text" id="message-input" name="message" placeholder="오늘 느낀 감정은 어떠한가요?" required>
+      <button type="submit">말씀 추천</button>
+    </form>
+
+    <form method="post" style="margin-top: 1em;">
+      {% csrf_token %}
+      <input type="hidden" name="clear" value="1">
+      <button type="submit" style="background:#aaa;">💫 대화 초기화</button>
+    </form>
+  </div>
+
+  <script>
+    function showLoading() {
+      const input = document.getElementById("message-input");
+      const userMessage = input.value.trim();
+      if (!userMessage) return false;
+
+      const msgList = document.getElementById("message-list");
+      const userMsgEl = document.createElement("div");
+      userMsgEl.className = "message user";
+      userMsgEl.innerHTML = `<span class="label">🙋 나:</span> ${userMessage}`;
+      msgList.appendChild(userMsgEl);
+
+      const loadingEl = document.getElementById("loading");
+      if (loadingEl.parentElement !== msgList) {
+        msgList.appendChild(loadingEl);
+      }
+      loadingEl.style.display = "block";
+
+      return true;
+    }
+  </script>
+</body>
+</html>
